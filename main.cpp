@@ -3,6 +3,10 @@
 
 using namespace std;
 
+/**
+ * 存储结构: 动态线性表.
+ * Created by 胡海彬(tomo) on 2020/9/21.
+ */
 int main() {
     Set<int> s1, s2;
     s1.add(1);

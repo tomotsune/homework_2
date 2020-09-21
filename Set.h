@@ -4,8 +4,8 @@
 #include <tuple>
 
 /**
- * 动态线性表
- * @tparam T
+ * 存储结构: 动态线性表.
+ * Created by 胡海彬(tomo) on 2020/9/21.
  */
 template<typename T>
 class Set {

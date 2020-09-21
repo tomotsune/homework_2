@@ -1,234 +1,236 @@
 #pragma once
-#include<iostream>
-using namespace std;
+
+#include <iostream>
+#include <tuple>
+
+/**
+ * 动态线性表
+ * @tparam T
+ */
 template<typename T>
-struct Node
-{
-    T val;
-    Node* next;
-    explicit Node(T x) :val(x), next(nullptr) {}
-};
-template<typename T>
-class Set
-{
+class Set {
 private:
-    Node<T>* head;
+    static const int DEFAULT_SIZE{100};
+    T *head;
     int length{};
+    int size{};
 public:
     Set();
-    Set (const Set& s);
-    void insertHead(T var);
-    void insert(T val, const int& pos);
-    void add(const T& data);
-    void remove(T val);
-    int getLength();
-    void reverse();
-    int find(T val);
-    void print();
-    Set<T>& operator+(const Set& s);
-    Set<T>& operator*(const Set& s);
-/*    friend ostream &operator<<(ostream &os, const Set &set){
-      set.print();
-    }*/
+
+    explicit Set(int size);
+
+    Set(const Set &s);
 
     ~Set();
+
+    void add(const T &data);
+
+    void insert(const T &data, const int &pos);
+
+    void removeByPos(const int &pos);
+
+    void removeByData(const T &data);
+
+    void clear();
+
+    bool isEmpty() const;
+
+    int getLength() const;
+
+    int getsize() const;
+
+    inline const T &operator[](const int &pos) const;
+
+    Set<T> operator+(const Set<T> &s) const;
+
+    Set<T> operator*(const Set<T> &s) const;
+
+    Set<T> operator-(const Set<T> &s) const;
+
+    bool operator<(const Set &rhs) const;
+
+    bool operator>(const Set &rhs) const;
+
+    bool operator<=(const Set &rhs) const;
+
+    bool operator>=(const Set &rhs) const;
+
+    friend std::ostream &operator<<(std::ostream &os, const Set<T> &Set) {
+        for (int i = 0; i < Set.length; ++i) {
+            os << Set.head[i] << " ";
+        }
+        return os;
+    }
+
+    bool operator==(const Set &rhs) const;
+
+    bool operator!=(const Set &rhs) const;
+
 };
 
 template<typename T>
-inline Set<T>::Set()
-{
-    head = nullptr;
-    length == 0;
+inline Set<T>::Set():size(DEFAULT_SIZE) {
+    head = new T[DEFAULT_SIZE];
 }
 
 template<typename T>
-inline void Set<T>::insertHead(T var)
-{
-    insert(var, 0);
+Set<T>::Set(int size):size(size) {
+    head = new T[size];
 }
 
 template<typename T>
-inline void Set<T>::insert(T val, const int& pos)
-{
-    if (pos < 0) {
-        cout << "pos must be greater than zero" << endl;
-        return;
-    }
-    int index{ 1 };//walking stick of temp
-    Node<T>* temp{ head };
-    auto* node = new Node<T>{ val };
-    if (pos == 0) {
-        node->next = temp;
-        head = node;
-        length++;
-        return;
-    }
-    //将temp置于要插入的节点之前.
-    while (temp != nullptr && index < pos) {
-        temp = temp->next;
-        ++index;
-    }
-    //插入位置不当
-    if (temp == nullptr) {
-        cout << "Insert failed!" << endl;
-    }
-    //交接后续结点.
-    node->next = temp->next;
-    temp->next = node;
-    ++length;
+inline Set<T>::~Set() {
+    delete[] head;
 }
 
 template<typename T>
-inline void Set<T>::remove(T val)
-{
-    int pos = find(val);
-    if (-1 == pos) {
-        cout << "delete failed";
-        return;
+void Set<T>::add(const T &data) {
+    head[length++] = data;
+}
+
+template<typename T>
+inline void Set<T>::insert(const T &data, const int &pos) {
+    if (pos < 0 || pos > length)return;
+    for (int i = 0; i < length; ++i) {
+        if (data == head[i])return;
     }
-    if (0==pos) {
-        head = head->next;
-        --length;
-        return;
+    if (++length > size) {
+        size += 8;
+        auto temp = new T[size];
+        for (int i = 0; i < length; ++i) {
+            temp[i] = head[i];
+        }
+        delete head;
+        head = temp;
     }
-    int index{ 1 };
-    Node<T>* temp = head;
-    while (index < pos) {
-        temp = temp->next;
+    for (int i = length; i > pos; --i) {
+        head[i] = head[i - 1];
     }
-    Node<T>* removeNode{ temp->next };
-    temp->next == temp->next->next;
-    delete removeNode;
+    head[pos] = data;
+}
+
+template<typename T>
+inline void Set<T>::removeByPos(const int &pos) {
+    if (pos < 0 || pos > length - 1)return;
+    for (int i = pos; i < length; ++i) {
+        head[i] = head[i + 1];
+    }
     --length;
 }
 
+
 template<typename T>
-inline int Set<T>::getLength()
-{
+int Set<T>::getsize() const {
+    return size;
+}
+
+
+template<typename T>
+int Set<T>::getLength() const {
     return length;
 }
 
-template<typename T>
-inline void Set<T>::reverse()
-{
-    if (head == nullptr) {
-        return;
-    }
-    Node<T>* curNode{ head }, * nextNode{ head->next }, * temp;
-    while (nextNode!=nullptr)
-    {
-        temp = nextNode->next;
-        nextNode->next = curNode;
-        curNode = nextNode;
-        nextNode = temp;
-    }
-    head->next = nullptr ;
-    head = curNode;
-}
 
 template<typename T>
-inline int Set<T>::find(T val)
-{
-    Node<T>* temp = head;
-    int index{};
-    while (temp != nullptr) {
-        if (temp->val == val) {
-            return index;
-        }
-        temp = temp->next;
-        ++index;
-    }
-    return -1;
-}
-
-template<typename T>
-inline void Set<T>::print()
-{
-    if (head == nullptr) {
-        cout << "List is empty" << endl;
-        return;
-    }
-    Node<T>* temp{ head };
-    while (temp!=nullptr)
-    {
-        cout << temp->val << endl;
-        temp = temp->next;
-    }
-    cout << endl;
-}
-
-template<typename T>
-inline Set<T>::~Set()
-{
-    Node<T>* temp;
-    for (int  i = 0; i < length; i++)
-    {
-        temp = head;
-        head = head->next;
-        delete temp;
-    }
-}
-
-template<typename T>
-Set<T>& Set<T>::operator+(const Set &s) {
-    auto temp_1{head},temp_2{s.head};
+Set<T> Set<T>::operator+(const Set <T> &s) const {
     auto sum{*this};
-    while(temp_2!= nullptr) {
-        while (temp_1 != nullptr) {
-            if (temp_1->val == temp_2->val){
-                break;
-            }
-            temp_1 = temp_1->next;
+    for (int i = 0; i < s.length; ++i) {
+        int num{};
+        for (int j = 0; j < length; ++j) {
+            if (head[j] != s.head[i])++num;
         }
-        if(temp_1== nullptr){
-            sum.add(temp_2->val);
-        }
-        temp_1=head;
-        temp_2=temp_2->next;
+        if (num == length)sum.add(s.head[i]);
     }
     return sum;
 }
 
 template<typename T>
-void Set<T>::add(const T &t) {
-    auto temp {head};
-    int index{};
-    while(temp!= nullptr){
-        temp=temp->next;
-        ++index;
-    }
-    insert(t, index);
-}
-
-template<typename T>
-Set<T> &Set<T>::operator*(const Set &s) {
-    auto temp_1{head},temp_2{s.head};
+Set<T> Set<T>::operator*(const Set <T> &s) const {
     Set<T> product{};
-    while(temp_1!= nullptr) {
-        while (temp_2 != nullptr) {
-            if (temp_1->val == temp_2->val){
-                product.add{t}
-            }
-            temp_1 = temp_1->next;
+    for (int i = 0; i < length; ++i) {
+        for (int j = 0; j < s.length; ++j) {
+            if (head[i] == s.head[j])product.add(s.head[j]);
         }
-        if(temp_1== nullptr){
-            intersection.add(temp_2->val);
-        }
-        temp_1=head;
-        temp_2=temp_2->next;
     }
-    return intersection;
+    return product;
 }
 
 template<typename T>
-Set<T>::Set(const Set &s) {
-    auto temp_1{head},temp_2{s.head};
-    head=new Node<T>{s.head};
-    while(temp_2!= nullptr){
-        temp_1->next=new Node<T>(temp_2->next);
-        temp_1=temp_1->next;
-        temp_2=temp_2->next;
+Set<T>::Set(const Set &s):Set(s.size) {
+    length = s.length;
+    for (int i = 0; i < s.length; ++i) {
+        head[i] = s.head[i];
     }
-    temp_1= nullptr;
 }
+
+template<typename T>
+const T &Set<T>::operator[](const int &pos) const {
+    return head[pos];
+}
+
+template<typename T>
+bool Set<T>::operator==(const Set &rhs) const {
+    int num{};
+    for (int i = 0; i < length; ++i) {
+        for (int j = 0; j < length; ++j) {
+            if (head[i] == rhs.head[j]) {
+                ++num;
+            }
+        }
+    }
+    return num == length;
+}
+
+template<typename T>
+bool Set<T>::operator!=(const Set &rhs) const {
+    return rhs != *this;
+}
+
+
+template<typename T>
+bool Set<T>::operator<=(const Set &rhs) const {
+    return *this * rhs == *this;
+}
+
+template<typename T>
+bool Set<T>::operator>=(const Set &rhs) const {
+    return *this * rhs == rhs;
+}
+
+template<typename T>
+Set<T> Set<T>::operator-(const Set <T> &s) const {
+    auto difference{*this};
+    Set<T> product{*this * s};
+    for (int i = 0; i < product.length; ++i) {
+        difference.removeByData(product.head[i]);
+    }
+    return difference;
+}
+
+template<typename T>
+void Set<T>::removeByData(const T &data) {
+    int pos{};
+    for (int i = 0; i < length; ++i) {
+        if (head[i] == data) {
+            pos = i;
+            break;
+        }
+    }
+    removeByPos(pos);
+}
+
+template<typename T>
+bool Set<T>::isEmpty() const {
+    return length == 0;
+}
+
+template<typename T>
+void Set<T>::clear() {
+    delete[] head;
+    length = 0;
+}
+
+
+
+
 
